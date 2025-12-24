@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { type DialogTitleProps, useForwardProps } from 'radix-vue';
+import { DialogTitle, type DialogTitleProps, useForwardProps } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
 
 const props = defineProps<
   DialogTitleProps & { class?: HTMLAttributes['class'] }
@@ -12,7 +13,7 @@ const delegatedProps = computed(() => {
   return delegated;
 });
 
-const _forwardedProps = useForwardProps(delegatedProps);
+const forwardedProps = useForwardProps(delegatedProps);
 </script>
 
 <template>

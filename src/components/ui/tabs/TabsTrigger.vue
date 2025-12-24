@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { TabsTrigger } from 'radix-vue';
 import { type TabsTriggerProps, useForwardProps } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
 
 const props = defineProps<
   TabsTriggerProps & { class?: HTMLAttributes['class'] }
@@ -12,7 +14,7 @@ const delegatedProps = computed(() => {
   return delegated;
 });
 
-const _forwardedProps = useForwardProps(delegatedProps);
+const forwardedProps = useForwardProps(delegatedProps);
 </script>
 
 <template>

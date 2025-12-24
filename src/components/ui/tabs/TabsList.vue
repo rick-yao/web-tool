@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { TabsList } from 'radix-vue';
 import type { TabsListProps } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
 
 const props = defineProps<
   TabsListProps & { class?: HTMLAttributes['class'] }
 >();
 
-const _delegatedProps = computed(() => {
+const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props;
 
   return delegated;

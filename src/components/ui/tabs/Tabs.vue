@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  TabsRoot,
   type TabsRootEmits,
   type TabsRootProps,
   useForwardPropsEmits,
@@ -8,7 +9,7 @@ import {
 const props = defineProps<TabsRootProps>();
 const emits = defineEmits<TabsRootEmits>();
 
-const _forwarded = useForwardPropsEmits(props, emits);
+const forwarded = useForwardPropsEmits(props, emits);
 </script>
 
 <template>

@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { Label } from 'radix-vue';
 import { cva } from 'class-variance-authority';
 import type { LabelProps } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
 
-const _labelVariants = cva(
+const labelVariants = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 );
 
 const props = defineProps<LabelProps & { class?: HTMLAttributes['class'] }>();
 
-const _delegatedProps = computed(() => {
+const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props;
 
   return delegated;

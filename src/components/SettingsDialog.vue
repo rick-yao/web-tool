@@ -3,7 +3,7 @@ import { useStorage } from '@vueuse/core';
 import { ref } from 'vue';
 import type { R2Config } from '@/composables/useR2Upload';
 
-const _config = useStorage<R2Config>('r2-config', {
+const config = useStorage<R2Config>('r2-config', {
   accountId: '',
   accessKeyId: '',
   secretAccessKey: '',
@@ -13,7 +13,7 @@ const _config = useStorage<R2Config>('r2-config', {
 
 const isOpen = ref(false);
 
-const _save = () => {
+const save = () => {
   isOpen.value = false;
 };
 </script>

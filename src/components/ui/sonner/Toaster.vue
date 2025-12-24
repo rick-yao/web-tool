@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { Toaster as Sonner } from 'vue-sonner';
 import type { ToasterProps } from 'vue-sonner';
 
-const _props = defineProps<ToasterProps>();
+const props = defineProps<ToasterProps>();
 </script>
 
 <template>

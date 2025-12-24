@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import {
+  DialogClose,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
   type DialogContentEmits,
   type DialogContentProps,
   useForwardPropsEmits,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-vue-next';
 
 const props = defineProps<
   DialogContentProps & { class?: HTMLAttributes['class'] }
@@ -17,7 +23,7 @@ const delegatedProps = computed(() => {
   return delegated;
 });
 
-const _forwarded = useForwardPropsEmits(delegatedProps, emits);
+const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>
 
 <template>

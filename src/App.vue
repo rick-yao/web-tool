@@ -134,7 +134,7 @@ async function processAndUpload(file: File, task: Task) {
   }
 }
 
-function _copyToClipboard(text: string) {
+function copyToClipboard(text: string) {
   copy(text);
   toast.success('Copied to clipboard');
 }

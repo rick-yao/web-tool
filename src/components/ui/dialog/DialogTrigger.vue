@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { DialogTriggerProps } from 'radix-vue';
+import { DialogTrigger, type DialogTriggerProps } from 'radix-vue';
 
-const _props = defineProps<DialogTriggerProps>();
+const props = defineProps<DialogTriggerProps>();
 </script>
 
 <template>
