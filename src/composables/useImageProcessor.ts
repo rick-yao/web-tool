@@ -53,8 +53,7 @@ export function useImageProcessor() {
               return;
             }
             const extension = format.split('/')[1];
-            const newName =
-              file.name.replace(/\.[^/.]+$/, '') + `.${extension}`;
+            const newName = `${file.name.replace(/\.[^/.]+$/, '')}.${extension}`;
             resolve(new File([blob], newName, { type: format }));
           },
           format,
@@ -142,9 +141,10 @@ export function useImageProcessor() {
         timestamp,
         files: results,
       };
-    } catch (e: any) {
-      error.value = e.message;
-      throw e;
+    } catch (e: unknown) {
+      const err = e as Error;
+      error.value = err.message;
+      throw err;
     } finally {
       isProcessing.value = false;
     }

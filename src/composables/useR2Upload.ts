@@ -81,7 +81,8 @@ export function useR2Upload() {
             fileType: file.type,
             url: publicUrl,
           });
-        } catch (err: any) {
+        } catch (error: unknown) {
+          const err = error as Error;
           console.error(`Error uploading ${file.name}:`, err);
           if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
             throw new Error(
@@ -94,9 +95,10 @@ export function useR2Upload() {
 
       await Promise.all(uploadPromises);
       return results;
-    } catch (e: any) {
-      error.value = e.message;
-      throw e;
+    } catch (e: unknown) {
+      const err = e as Error;
+      error.value = err.message;
+      throw err;
     } finally {
       isUploading.value = false;
     }

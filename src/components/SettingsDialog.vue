@@ -1,22 +1,9 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core';
-import { Settings } from 'lucide-vue-next';
 import { ref } from 'vue';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import type { R2Config } from '@/composables/useR2Upload';
 
-const config = useStorage<R2Config>('r2-config', {
+const _config = useStorage<R2Config>('r2-config', {
   accountId: '',
   accessKeyId: '',
   secretAccessKey: '',
@@ -26,7 +13,7 @@ const config = useStorage<R2Config>('r2-config', {
 
 const isOpen = ref(false);
 
-const save = () => {
+const _save = () => {
   isOpen.value = false;
 };
 </script>
