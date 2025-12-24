@@ -10,6 +10,7 @@
 - **构建工具:** Vite
 - **语言:** TypeScript
 - **状态/工具库:** VueUse (`@vueuse/core`) - 用于处理 LocalStorage 持久化和常用 Hooks。
+- **构建工具：pnpm
 
 ### UI 与样式
 - **UI 组件库:** `shadcn-vue` (Shadcn UI 的 Vue 移植版)。
@@ -23,7 +24,7 @@
 
 ### 推荐依赖
 - **R2 交互:** `@aws-sdk/client-s3` (Cloudflare R2 兼容 S3 协议)。
-- **图片处理:** `browser-image-compression` (用于压缩) 或原生 `Canvas API` (用于格式转换)。
+- **图片处理:** `browser-image-compression` (用于压缩) 或原生 `Canvas API` (用于格式转换)，如果`sharp`这个库可以满足需求，优先使用sharp
 
 ## 3. 功能需求详情
 
