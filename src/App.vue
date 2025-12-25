@@ -2,7 +2,6 @@
 import { useStorage } from '@vueuse/core';
 import { ref } from 'vue';
 import { type R2Config } from '@/composables/useR2Upload';
-import SettingsDialog from '@/components/SettingsDialog.vue';
 import ImageOptimizer from '@/components/ImageOptimizer.vue';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -78,8 +77,6 @@ const activeTab = ref<'image-optimizer' | 'tool2'>('image-optimizer');
               </button>
             </nav>
           </div>
-
-          <SettingsDialog />
         </div>
       </div>
     </header>

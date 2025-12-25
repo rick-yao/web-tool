@@ -1,15 +1,23 @@
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core';
 import { ref } from 'vue';
+import { Settings } from 'lucide-vue-next';
 import type { R2Config } from '@/composables/useR2Upload';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-const config = useStorage<R2Config>('r2-config', {
-  accountId: '',
-  accessKeyId: '',
-  secretAccessKey: '',
-  bucketName: '',
-  publicDomain: '',
-});
+const props = defineProps<{
+  config: R2Config;
+}>();
 
 const isOpen = ref(false);
 
@@ -27,31 +35,31 @@ const save = () => {
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>Settings</DialogTitle>
+        <DialogTitle>Cloudflare R2 Settings</DialogTitle>
         <DialogDescription>
-          Configure your Cloudflare R2 credentials here.
+          Configure your Cloudflare R2 credentials here. All fields are required except Public Domain.
         </DialogDescription>
       </DialogHeader>
       <div class="grid gap-4 py-4">
         <div class="grid grid-cols-4 items-center gap-4">
           <Label for="accountId" class="text-right">Account ID</Label>
-          <Input id="accountId" v-model="config.accountId" class="col-span-3" />
+          <Input id="accountId" v-model="props.config.accountId" class="col-span-3" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
         </div>
         <div class="grid grid-cols-4 items-center gap-4">
           <Label for="accessKey" class="text-right">Access Key</Label>
-          <Input id="accessKey" v-model="config.accessKeyId" class="col-span-3" type="password" />
+          <Input id="accessKey" v-model="props.config.accessKeyId" class="col-span-3" type="password" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
         </div>
         <div class="grid grid-cols-4 items-center gap-4">
           <Label for="secretKey" class="text-right">Secret Key</Label>
-          <Input id="secretKey" v-model="config.secretAccessKey" class="col-span-3" type="password" />
+          <Input id="secretKey" v-model="props.config.secretAccessKey" class="col-span-3" type="password" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
         </div>
         <div class="grid grid-cols-4 items-center gap-4">
-          <Label for="bucket" class="text-right">Bucket</Label>
-          <Input id="bucket" v-model="config.bucketName" class="col-span-3" />
+          <Label for="bucket" class="text-right">Bucket Name</Label>
+          <Input id="bucket" v-model="props.config.bucketName" class="col-span-3" placeholder="my-bucket" />
         </div>
         <div class="grid grid-cols-4 items-center gap-4">
-          <Label for="domain" class="text-right">Domain</Label>
-          <Input id="domain" v-model="config.publicDomain" placeholder="e.g., cdn.example.com" class="col-span-3" />
+          <Label for="domain" class="text-right">Public Domain</Label>
+          <Input id="domain" v-model="props.config.publicDomain" placeholder="cdn.example.com (optional)" class="col-span-3" />
         </div>
       </div>
       <DialogFooter>
