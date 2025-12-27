@@ -184,15 +184,6 @@ function copyToClipboard(text: string) {
                 <div
                   class="flex items-center gap-2 text-xs text-muted-foreground mt-0.5"
                 >
-                  <!-- Debug info -->
-                  <span
-                    class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded"
-                  >
-                    DEBUG: status={{ task.status }}, results={{
-                      task.results.length
-                    }}
-                  </span>
-
                   <span
                     v-if="task.status === 'processing'"
                     class="text-blue-500 flex items-center gap-1"
@@ -247,23 +238,17 @@ function copyToClipboard(text: string) {
                   >
                     {{ res.type }}
                   </span>
-                  <a
-                    :href="res.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-muted-foreground hover:text-primary transition-colors truncate"
+                  <button
+                    @click="copyToClipboard(res.url)"
+                    class="text-muted-foreground hover:text-primary transition-colors truncate text-left flex-1 cursor-pointer"
+                    :title="'Click to copy: ' + res.url"
                   >
                     {{ res.url }}
-                  </a>
+                  </button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="h-6 w-6 opacity-0 group-hover/item:opacity-100 transition-opacity"
-                  @click="copyToClipboard(res.url)"
-                >
-                  <Copy class="h-3 w-3" />
-                </Button>
+                <Copy
+                  class="h-3 w-3 text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-opacity"
+                />
               </div>
             </div>
           </CardContent>
