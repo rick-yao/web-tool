@@ -14,6 +14,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@jsquash/avif', '@jsquash/webp', '@jsquash/png'],
   },
+  worker: {
+    format: 'es',
+  },
   server: {
     headers: {
       'Cross-Origin-Embedder-Policy': 'require-corp',
