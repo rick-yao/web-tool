@@ -4,7 +4,6 @@ import { CheckCircle2, Copy, Loader2, Upload, XCircle } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import SettingsDialog from '@/components/SettingsDialog.vue';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
