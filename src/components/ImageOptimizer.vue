@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { useClipboard, useDropZone, useFileDialog } from '@vueuse/core';
-import { CheckCircle2, Copy, Loader2, Upload, XCircle } from 'lucide-vue-next';
-import { ref } from 'vue';
-import { toast } from 'vue-sonner';
-import SettingsDialog from '@/components/SettingsDialog.vue';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { useClipboard, useDropZone, useFileDialog } from "@vueuse/core";
+import { CheckCircle2, Copy, Loader2, Upload, XCircle } from "lucide-vue-next";
+import { ref } from "vue";
+import { toast } from "vue-sonner";
+import SettingsDialog from "@/components/SettingsDialog.vue";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   type ProcessingResult,
   useImageProcessor,
-} from '@/composables/useImageProcessor';
-import { type R2Config, useR2Upload } from '@/composables/useR2Upload';
+} from "@/composables/useImageProcessor";
+import { type R2Config, useR2Upload } from "@/composables/useR2Upload";
 
 const props = defineProps<{
   config: R2Config;
@@ -20,7 +20,7 @@ const props = defineProps<{
 interface Task {
   id: number;
   originalName: string;
-  status: 'processing' | 'uploading' | 'completed' | 'error';
+  status: "processing" | "uploading" | "completed" | "error";
   progress: number;
   error: string;
   results: { type: string; url: string }[];
@@ -35,7 +35,7 @@ const { uploadFiles } = useR2Upload();
 const { copy } = useClipboard();
 
 const { open, onChange } = useFileDialog({
-  accept: 'image/*',
+  accept: "image/*",
   multiple: true,
 });
 
@@ -72,61 +72,64 @@ async function handleFiles(files: File[]) {
     !props.config.accessKeyId ||
     !props.config.secretAccessKey
   ) {
-    toast.error('Please configure R2 settings first');
+    toast.error("Please configure R2 settings first");
     return;
   }
 
   for (const file of files) {
-    const task = {
+    const task: Task = {
       id: Date.now() + Math.random(),
       originalName: file.name,
-      status: 'processing' as
-        | 'processing'
-        | 'uploading'
-        | 'completed'
-        | 'error',
+      status: "processing",
       progress: 0,
-      error: '',
-      results: [] as { type: string; url: string }[],
+      error: "",
+      results: [],
     };
     tasks.value.unshift(task);
-    processAndUpload(file, task);
+    processAndUpload(file, task.id);
   }
 }
 
-async function processAndUpload(file: File, task: Task) {
+async function processAndUpload(file: File, taskId: number) {
+  // Find the task index in the array
+  const taskIndex = tasks.value.findIndex((t) => t.id === taskId);
+  if (taskIndex === -1) {
+    console.error("[processAndUpload] Task not found:", taskId);
+    return;
+  }
+
   try {
-    task.status = 'processing';
-    task.progress = 25;
+    tasks.value[taskIndex].status = "processing";
+    tasks.value[taskIndex].progress = 25;
 
     const result: ProcessingResult = await processImage(file);
-    task.progress = 50;
+    tasks.value[taskIndex].progress = 50;
 
-    task.status = 'uploading';
+    tasks.value[taskIndex].status = "uploading";
     const filesToUpload = result.files.map((f) => f.file);
 
     const uploadResults = await uploadFiles(filesToUpload, props.config);
 
-    task.results = uploadResults.map((r) => ({
-      type: (r.fileType.split('/')[1] ?? 'UNKNOWN').toUpperCase(),
+    tasks.value[taskIndex].results = uploadResults.map((r) => ({
+      type: (r.fileType.split("/")[1] ?? "UNKNOWN").toUpperCase(),
       url: r.url,
     }));
 
-    task.status = 'completed';
-    task.progress = 100;
+    tasks.value[taskIndex].status = "completed";
+    tasks.value[taskIndex].progress = 100;
     toast.success(`Processed ${file.name}`);
   } catch (error: unknown) {
     const e = error as Error;
     console.error(e);
-    task.status = 'error';
-    task.error = e.message;
+    tasks.value[taskIndex].status = "error";
+    tasks.value[taskIndex].error = e.message;
     toast.error(`Error processing ${file.name}: ${e.message}`);
   }
 }
 
 function copyToClipboard(text: string) {
   copy(text);
-  toast.success('Copied to clipboard');
+  toast.success("Copied to clipboard");
 }
 </script>
 
@@ -181,6 +184,15 @@ function copyToClipboard(text: string) {
                 <div
                   class="flex items-center gap-2 text-xs text-muted-foreground mt-0.5"
                 >
+                  <!-- Debug info -->
+                  <span
+                    class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded"
+                  >
+                    DEBUG: status={{ task.status }}, results={{
+                      task.results.length
+                    }}
+                  </span>
+
                   <span
                     v-if="task.status === 'processing'"
                     class="text-blue-500 flex items-center gap-1"
