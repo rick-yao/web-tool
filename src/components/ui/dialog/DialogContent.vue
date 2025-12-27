@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next';
 import {
   DialogClose,
   DialogContent,
-  DialogOverlay,
-  DialogPortal,
   type DialogContentEmits,
   type DialogContentProps,
+  DialogOverlay,
+  DialogPortal,
   useForwardPropsEmits,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-vue-next';
 
 const props = defineProps<
   DialogContentProps & { class?: HTMLAttributes['class'] }

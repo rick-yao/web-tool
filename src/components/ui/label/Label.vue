@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Label } from 'radix-vue';
 import { cva } from 'class-variance-authority';
 import type { LabelProps } from 'radix-vue';
+import { Label } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 import { cn } from '@/lib/utils';
 

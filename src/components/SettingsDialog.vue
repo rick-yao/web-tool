@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Settings } from 'lucide-vue-next';
-import type { R2Config } from '@/composables/useR2Upload';
+import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { R2Config } from '@/composables/useR2Upload';
 
 const props = defineProps<{
   config: R2Config;

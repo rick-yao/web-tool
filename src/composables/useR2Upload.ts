@@ -1,5 +1,5 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { ref } from "vue";
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { ref } from 'vue';
 
 export interface R2Config {
   accountId: string;
@@ -21,7 +21,7 @@ export function useR2Upload() {
 
   const uploadFiles = async (
     files: File[],
-    config: R2Config
+    config: R2Config,
   ): Promise<UploadResult[]> => {
     isUploading.value = true;
     uploadProgress.value = 0;
@@ -33,13 +33,13 @@ export function useR2Upload() {
       !config.secretAccessKey ||
       !config.bucketName
     ) {
-      error.value = "Missing R2 configuration";
+      error.value = 'Missing R2 configuration';
       isUploading.value = false;
       throw new Error(error.value);
     }
 
     const client = new S3Client({
-      region: "auto",
+      region: 'auto',
       endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
       credentials: {
         accessKeyId: config.accessKeyId,
@@ -72,12 +72,12 @@ export function useR2Upload() {
           completedCount++;
           uploadProgress.value = (completedCount / files.length) * 100;
 
-          let publicUrl = "";
+          let publicUrl = '';
           if (config.publicDomain) {
             // Remove protocol if present to standardise
             const cleanDomain = config.publicDomain
-              .replace(/^https?:\/\//, "")
-              .replace(/\/$/, "");
+              .replace(/^https?:\/\//, '')
+              .replace(/\/$/, '');
             publicUrl = `https://${cleanDomain}/${file.name}`;
           } else {
             // Fallback/Default R2 link logic - though usually private
@@ -91,9 +91,9 @@ export function useR2Upload() {
         } catch (error: unknown) {
           const err = error as Error;
           console.error(`Error uploading ${file.name}:`, err);
-          if (err.name === "TypeError" && err.message === "Failed to fetch") {
+          if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
             throw new Error(
-              "CORS Error: Please ensure your R2 bucket allows PUT method from this origin."
+              'CORS Error: Please ensure your R2 bucket allows PUT method from this origin.',
             );
           }
           throw err;

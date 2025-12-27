@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { useClipboard, useDropZone, useFileDialog } from '@vueuse/core';
+import { CheckCircle2, Copy, Loader2, Upload, XCircle } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
+import SettingsDialog from '@/components/SettingsDialog.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import {
   type ProcessingResult,
   useImageProcessor,
 } from '@/composables/useImageProcessor';
 import { type R2Config, useR2Upload } from '@/composables/useR2Upload';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Upload, Loader2, CheckCircle2, XCircle, Copy } from 'lucide-vue-next';
-import SettingsDialog from '@/components/SettingsDialog.vue';
 
 const props = defineProps<{
   config: R2Config;
