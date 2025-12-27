@@ -1,9 +1,11 @@
-import imageCompression from 'browser-image-compression';
-import { ref } from 'vue';
+import { decode as decodeAvif, encode as encodeAvif } from "@jsquash/avif";
+import { decode as decodePng, encode as encodePng } from "@jsquash/png";
+import { encode as encodeWebp } from "@jsquash/webp";
+import { ref } from "vue";
 
 export interface ProcessedFile {
   file: File;
-  type: 'webp' | 'avif' | 'original';
+  type: "webp" | "avif" | "original";
   url: string; // Local preview URL or final URL placeholder
 }
 
@@ -17,50 +19,43 @@ export function useImageProcessor() {
   const isProcessing = ref(false);
   const error = ref<string | null>(null);
 
-  const checkAvifSupport = async (): Promise<boolean> => {
-    if (!('HTMLCanvasElement' in window)) return false;
-    const canvas = document.createElement('canvas');
-    canvas.width = 1;
-    canvas.height = 1;
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        resolve(!!blob);
-      }, 'image/avif');
-    });
-  };
+  /**
+   * Decode image file to ImageData using appropriate decoder
+   */
+  const decodeImage = async (file: File): Promise<ImageData> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const mimeType = file.type;
 
-  const convertToFormat = async (
-    file: File,
-    format: 'image/webp' | 'image/avif',
-    quality = 0.8,
-  ): Promise<File> => {
+    // Use appropriate decoder based on file type
+    if (mimeType === "image/png") {
+      const result = await decodePng(arrayBuffer);
+      if (!result) throw new Error("Failed to decode PNG");
+      return result;
+    }
+    if (mimeType === "image/avif") {
+      const result = await decodeAvif(arrayBuffer);
+      if (!result) throw new Error("Failed to decode AVIF");
+      return result;
+    }
+
+    // For other formats (JPEG, etc.), use Canvas API to decode
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         canvas.width = img.width;
         canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
         if (!ctx) {
-          reject(new Error('Canvas context not available'));
+          reject(new Error("Canvas context not available"));
           return;
         }
         ctx.drawImage(img, 0, 0);
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error(`Failed to convert to ${format}`));
-              return;
-            }
-            const extension = format.split('/')[1];
-            const newName = `${file.name.replace(/\.[^/.]+$/, '')}.${extension}`;
-            resolve(new File([blob], newName, { type: format }));
-          },
-          format,
-          quality,
-        );
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(img.src);
+        resolve(imageData);
       };
-      img.onerror = (e) => reject(e);
+      img.onerror = () => reject(new Error("Failed to decode image"));
       img.src = URL.createObjectURL(file);
     });
   };
@@ -70,68 +65,98 @@ export function useImageProcessor() {
     error.value = null;
     const timestamp = Math.floor(Date.now() / 1000);
     const slugName = file.name
-      .replace(/\.[^/.]+$/, '')
+      .replace(/\.[^/.]+$/, "")
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-');
+      .replace(/[^a-z0-9]+/g, "-");
 
     try {
       const results: ProcessedFile[] = [];
 
-      // 1. WebP
+      // Decode the original image once
+      const imageData = await decodeImage(file);
+
+      // 1. WebP conversion with quality 0.8
       try {
-        const webpFile = await convertToFormat(file, 'image/webp', 0.8);
-        // Rename with timestamp
+        const webpBuffer = await encodeWebp(imageData, { quality: 80 });
         const finalWebPName = `${slugName}_${timestamp}.webp`;
+        const webpBlob = new Blob([webpBuffer], { type: "image/webp" });
         results.push({
-          file: new File([webpFile], finalWebPName, { type: 'image/webp' }),
-          type: 'webp',
-          url: URL.createObjectURL(webpFile),
+          file: new File([webpBlob], finalWebPName, { type: "image/webp" }),
+          type: "webp",
+          url: URL.createObjectURL(webpBlob),
         });
       } catch (e) {
-        console.error('WebP conversion failed', e);
+        console.error("WebP conversion failed", e);
       }
 
-      // 2. AVIF
-      const avifSupported = await checkAvifSupport();
-      if (avifSupported) {
-        try {
-          const avifFile = await convertToFormat(file, 'image/avif', 0.8);
-          const finalAvifName = `${slugName}_${timestamp}.avif`;
-          results.push({
-            file: new File([avifFile], finalAvifName, { type: 'image/avif' }),
-            type: 'avif',
-            url: URL.createObjectURL(avifFile),
-          });
-        } catch (e) {
-          console.error('AVIF conversion failed', e);
-        }
-      }
-
-      // 3. Compressed Original
+      // 2. AVIF conversion with quality 0.6 for better compression
       try {
-        const options = {
-          maxSizeMB: 1, // Target 1MB or similar? Requirements say "compress to reduce size", not specific target.
-          useWebWorker: true,
-          initialQuality: 0.8,
-        };
-        const compressedBlob = await imageCompression(file, options);
-        const ext = file.name.split('.').pop();
-        const finalOriginalName = `${slugName}_${timestamp}.${ext}`;
-        results.push({
-          file: new File([compressedBlob], finalOriginalName, {
-            type: file.type,
-          }),
-          type: 'original',
-          url: URL.createObjectURL(compressedBlob),
+        const avifBuffer = await encodeAvif(imageData, {
+          quality: 60,
+          // Optional: speed vs quality tradeoff (0-10, higher = faster but lower quality)
+          speed: 6,
         });
+        const finalAvifName = `${slugName}_${timestamp}.avif`;
+        const avifBlob = new Blob([avifBuffer], { type: "image/avif" });
+
+        // Only include AVIF if it's smaller than the original
+        if (avifBlob.size < file.size) {
+          results.push({
+            file: new File([avifBlob], finalAvifName, { type: "image/avif" }),
+            type: "avif",
+            url: URL.createObjectURL(avifBlob),
+          });
+        } else {
+          console.warn(
+            `AVIF (${avifBlob.size} bytes) is larger than original (${file.size} bytes), skipping`
+          );
+        }
       } catch (e) {
-        console.error('Compression failed', e);
-        // Fallback to original if compression fails?
-        const ext = file.name.split('.').pop();
+        console.error("AVIF conversion failed", e);
+      }
+
+      // 3. Compressed original format
+      try {
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        const finalOriginalName = `${slugName}_${timestamp}.${ext}`;
+
+        // Use @jsquash/png for PNG compression
+        if (file.type === "image/png") {
+          const pngBuffer = await encodePng(imageData);
+          const pngBlob = new Blob([pngBuffer], { type: "image/png" });
+          results.push({
+            file: new File([pngBlob], finalOriginalName, { type: file.type }),
+            type: "original",
+            url: URL.createObjectURL(pngBlob),
+          });
+        } else {
+          // For JPEG and other formats, use Canvas API with compression
+          const canvas = document.createElement("canvas");
+          canvas.width = imageData.width;
+          canvas.height = imageData.height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.putImageData(imageData, 0, 0);
+            const blob = await new Promise<Blob | null>((resolve) => {
+              canvas.toBlob(resolve, file.type, 0.8);
+            });
+            if (blob) {
+              results.push({
+                file: new File([blob], finalOriginalName, { type: file.type }),
+                type: "original",
+                url: URL.createObjectURL(blob),
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Original format compression failed", e);
+        // Fallback to original file
+        const ext = file.name.split(".").pop();
         const finalOriginalName = `${slugName}_${timestamp}.${ext}`;
         results.push({
           file: new File([file], finalOriginalName, { type: file.type }),
-          type: 'original',
+          type: "original",
           url: URL.createObjectURL(file),
         });
       }

@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core';
-import { ref } from 'vue';
-import { type R2Config } from '@/composables/useR2Upload';
-import ImageOptimizer from '@/components/ImageOptimizer.vue';
-import { Toaster } from '@/components/ui/sonner';
+import { useStorage } from "@vueuse/core";
+import { ref } from "vue";
+import { type R2Config } from "@/composables/useR2Upload";
+import ImageOptimizer from "@/components/ImageOptimizer.vue";
+import { Toaster } from "@/components/ui/sonner";
 
-const config = useStorage<R2Config>('r2-config', {
-  accountId: '',
-  accessKeyId: '',
-  secretAccessKey: '',
-  bucketName: '',
-  publicDomain: '',
+const config = useStorage<R2Config>("r2-config", {
+  accountId: "",
+  accessKeyId: "",
+  secretAccessKey: "",
+  bucketName: "",
+  publicDomain: "",
 });
 
-const activeTab = ref<'image-optimizer' | 'tool2'>('image-optimizer');
+const activeTab = ref<"image-optimizer" | "tool2">("image-optimizer");
 </script>
 
 <template>
