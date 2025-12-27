@@ -1,25 +1,24 @@
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core';
-import { ref } from 'vue';
-import ImageOptimizer from '@/components/ImageOptimizer.vue';
-import { Toaster } from '@/components/ui/sonner';
-import type { R2Config } from '@/composables/useR2Upload';
+import { useStorage } from "@vueuse/core";
+import { ref } from "vue";
+import ImageOptimizer from "@/components/ImageOptimizer.vue";
+import { Toaster } from "@/components/ui/sonner";
+import type { R2Config } from "@/composables/useR2Upload";
+import "vue-sonner/style.css";
 
-const config = useStorage<R2Config>('r2-config', {
-  accountId: '',
-  accessKeyId: '',
-  secretAccessKey: '',
-  bucketName: '',
-  publicDomain: '',
+const config = useStorage<R2Config>("r2-config", {
+  accountId: "",
+  accessKeyId: "",
+  secretAccessKey: "",
+  bucketName: "",
+  publicDomain: "",
 });
 
-const activeTab = ref<'image-optimizer' | 'tool2'>('image-optimizer');
+const activeTab = ref<"image-optimizer" | "tool2">("image-optimizer");
 </script>
 
 <template>
   <div class="min-h-screen bg-background text-foreground font-sans">
-    <Toaster />
-
     <!-- Navbar with Tabs -->
     <header class="border-b">
       <div class="container mx-auto px-4">
@@ -113,6 +112,7 @@ const activeTab = ref<'image-optimizer' | 'tool2'>('image-optimizer');
         </div>
       </div>
     </main>
+    <Toaster />
   </div>
 </template>
 
