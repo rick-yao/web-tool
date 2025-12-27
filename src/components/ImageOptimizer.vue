@@ -99,31 +99,38 @@ async function processAndUpload(file: File, taskId: number) {
     return;
   }
 
+  // Get a reference to the task to avoid repeated array access and type issues
+  const task = tasks.value[taskIndex];
+  if (!task) {
+    console.error('[processAndUpload] Task is undefined:', taskId);
+    return;
+  }
+
   try {
-    tasks.value[taskIndex].status = 'processing';
-    tasks.value[taskIndex].progress = 25;
+    task.status = 'processing';
+    task.progress = 25;
 
     const result: ProcessingResult = await processImage(file);
-    tasks.value[taskIndex].progress = 50;
+    task.progress = 50;
 
-    tasks.value[taskIndex].status = 'uploading';
+    task.status = 'uploading';
     const filesToUpload = result.files.map((f) => f.file);
 
     const uploadResults = await uploadFiles(filesToUpload, props.config);
 
-    tasks.value[taskIndex].results = uploadResults.map((r) => ({
+    task.results = uploadResults.map((r) => ({
       type: (r.fileType.split('/')[1] ?? 'UNKNOWN').toUpperCase(),
       url: r.url,
     }));
 
-    tasks.value[taskIndex].status = 'completed';
-    tasks.value[taskIndex].progress = 100;
+    task.status = 'completed';
+    task.progress = 100;
     toast.success(`Processed ${file.name}`);
   } catch (error: unknown) {
     const e = error as Error;
     console.error(e);
-    tasks.value[taskIndex].status = 'error';
-    tasks.value[taskIndex].error = e.message;
+    task.status = 'error';
+    task.error = e.message;
     toast.error(`Error processing ${file.name}: ${e.message}`);
   }
 }
@@ -139,7 +146,12 @@ function generateHtmlSnippet(results: { type: string; url: string }[]): string {
   const fallback =
     results.find(
       (r) => r.type === 'PNG' || r.type === 'JPG' || r.type === 'JPEG',
-    ) || results[0];
+    ) ?? results[0];
+
+  // Safety check: if no results exist, return empty picture tag
+  if (!fallback) {
+    return '<picture>\n  <img src="" alt="Image description">\n</picture>';
+  }
 
   let html = '<picture>\n';
   if (avif) {
