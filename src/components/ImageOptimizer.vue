@@ -7,6 +7,7 @@ import SettingsDialog from "@/components/SettingsDialog.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   type ProcessingResult,
   useImageProcessor,
@@ -131,6 +132,26 @@ function copyToClipboard(text: string) {
   copy(text);
   toast.success("Copied to clipboard");
 }
+
+function generateHtmlSnippet(results: { type: string; url: string }[]): string {
+  const avif = results.find((r) => r.type === "AVIF");
+  const webp = results.find((r) => r.type === "WEBP");
+  const fallback =
+    results.find(
+      (r) => r.type === "PNG" || r.type === "JPG" || r.type === "JPEG"
+    ) || results[0];
+
+  let html = "<picture>\n";
+  if (avif) {
+    html += `  <source srcset="${avif.url}" type="image/avif">\n`;
+  }
+  if (webp) {
+    html += `  <source srcset="${webp.url}" type="image/webp">\n`;
+  }
+  html += `  <img src="${fallback.url}" alt="Image description">\n`;
+  html += "</picture>";
+  return html;
+}
 </script>
 
 <template>
@@ -250,6 +271,55 @@ function copyToClipboard(text: string) {
                   class="h-3 w-3 text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-opacity"
                 />
               </div>
+            </div>
+
+            <!-- Code Snippets -->
+            <div v-if="task.status === 'completed'" class="mt-4">
+              <Tabs default-value="html" class="w-full">
+                <TabsList class="grid w-full grid-cols-2">
+                  <TabsTrigger value="html">HTML</TabsTrigger>
+                  <TabsTrigger value="markdown">Markdown</TabsTrigger>
+                </TabsList>
+                <TabsContent value="html" class="mt-2">
+                  <button
+                    @click="copyToClipboard(generateHtmlSnippet(task.results))"
+                    class="w-full text-left p-3 bg-muted rounded-md hover:bg-muted/80 transition-colors cursor-pointer group"
+                    title="Click to copy HTML code"
+                  >
+                    <pre
+                      class="text-xs font-mono text-muted-foreground overflow-x-auto"
+                    ><code>{{ generateHtmlSnippet(task.results) }}</code></pre>
+                    <div
+                      class="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Copy class="h-3 w-3" />
+                      <span>Click to copy</span>
+                    </div>
+                  </button>
+                </TabsContent>
+                <TabsContent value="markdown" class="mt-2">
+                  <div class="space-y-2">
+                    <button
+                      v-for="res in task.results"
+                      :key="res.url"
+                      @click="
+                        copyToClipboard(
+                          `![${res.type.toLowerCase()}](${res.url})`
+                        )
+                      "
+                      class="w-full text-left p-3 bg-muted rounded-md hover:bg-muted/80 transition-colors cursor-pointer group flex items-center justify-between"
+                      :title="`Click to copy ${res.type} Markdown`"
+                    >
+                      <pre
+                        class="text-xs font-mono text-muted-foreground overflow-x-auto flex-1"
+                      ><code>![{{ res.type.toLowerCase() }}]({{ res.url }})</code></pre>
+                      <Copy
+                        class="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0"
+                      />
+                    </button>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </CardContent>
         </Card>
