@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { useClipboard, useDropZone, useFileDialog } from "@vueuse/core";
-import { CheckCircle2, Copy, Loader2, Upload, XCircle } from "lucide-vue-next";
-import { ref } from "vue";
-import { toast } from "vue-sonner";
-import SettingsDialog from "@/components/SettingsDialog.vue";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useClipboard, useDropZone, useFileDialog } from '@vueuse/core';
+import { CheckCircle2, Copy, Loader2, Upload, XCircle } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { toast } from 'vue-sonner';
+import SettingsDialog from '@/components/SettingsDialog.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   type ProcessingResult,
   useImageProcessor,
-} from "@/composables/useImageProcessor";
-import { type R2Config, useR2Upload } from "@/composables/useR2Upload";
+} from '@/composables/useImageProcessor';
+import { type R2Config, useR2Upload } from '@/composables/useR2Upload';
 
 const props = defineProps<{
   config: R2Config;
@@ -21,7 +21,7 @@ const props = defineProps<{
 interface Task {
   id: number;
   originalName: string;
-  status: "processing" | "uploading" | "completed" | "error";
+  status: 'processing' | 'uploading' | 'completed' | 'error';
   progress: number;
   error: string;
   results: { type: string; url: string }[];
@@ -36,7 +36,7 @@ const { uploadFiles } = useR2Upload();
 const { copy } = useClipboard();
 
 const { open, onChange } = useFileDialog({
-  accept: "image/*",
+  accept: 'image/*',
   multiple: true,
 });
 
@@ -73,7 +73,7 @@ async function handleFiles(files: File[]) {
     !props.config.accessKeyId ||
     !props.config.secretAccessKey
   ) {
-    toast.error("Please configure R2 settings first");
+    toast.error('Please configure R2 settings first');
     return;
   }
 
@@ -81,9 +81,9 @@ async function handleFiles(files: File[]) {
     const task: Task = {
       id: Date.now() + Math.random(),
       originalName: file.name,
-      status: "processing",
+      status: 'processing',
       progress: 0,
-      error: "",
+      error: '',
       results: [],
     };
     tasks.value.unshift(task);
@@ -95,34 +95,34 @@ async function processAndUpload(file: File, taskId: number) {
   // Find the task index in the array
   const taskIndex = tasks.value.findIndex((t) => t.id === taskId);
   if (taskIndex === -1) {
-    console.error("[processAndUpload] Task not found:", taskId);
+    console.error('[processAndUpload] Task not found:', taskId);
     return;
   }
 
   try {
-    tasks.value[taskIndex].status = "processing";
+    tasks.value[taskIndex].status = 'processing';
     tasks.value[taskIndex].progress = 25;
 
     const result: ProcessingResult = await processImage(file);
     tasks.value[taskIndex].progress = 50;
 
-    tasks.value[taskIndex].status = "uploading";
+    tasks.value[taskIndex].status = 'uploading';
     const filesToUpload = result.files.map((f) => f.file);
 
     const uploadResults = await uploadFiles(filesToUpload, props.config);
 
     tasks.value[taskIndex].results = uploadResults.map((r) => ({
-      type: (r.fileType.split("/")[1] ?? "UNKNOWN").toUpperCase(),
+      type: (r.fileType.split('/')[1] ?? 'UNKNOWN').toUpperCase(),
       url: r.url,
     }));
 
-    tasks.value[taskIndex].status = "completed";
+    tasks.value[taskIndex].status = 'completed';
     tasks.value[taskIndex].progress = 100;
     toast.success(`Processed ${file.name}`);
   } catch (error: unknown) {
     const e = error as Error;
     console.error(e);
-    tasks.value[taskIndex].status = "error";
+    tasks.value[taskIndex].status = 'error';
     tasks.value[taskIndex].error = e.message;
     toast.error(`Error processing ${file.name}: ${e.message}`);
   }
@@ -130,18 +130,18 @@ async function processAndUpload(file: File, taskId: number) {
 
 function copyToClipboard(text: string) {
   copy(text);
-  toast.success("Copied to clipboard");
+  toast.success('Copied to clipboard');
 }
 
 function generateHtmlSnippet(results: { type: string; url: string }[]): string {
-  const avif = results.find((r) => r.type === "AVIF");
-  const webp = results.find((r) => r.type === "WEBP");
+  const avif = results.find((r) => r.type === 'AVIF');
+  const webp = results.find((r) => r.type === 'WEBP');
   const fallback =
     results.find(
-      (r) => r.type === "PNG" || r.type === "JPG" || r.type === "JPEG"
+      (r) => r.type === 'PNG' || r.type === 'JPG' || r.type === 'JPEG',
     ) || results[0];
 
-  let html = "<picture>\n";
+  let html = '<picture>\n';
   if (avif) {
     html += `  <source srcset="${avif.url}" type="image/avif">\n`;
   }
@@ -149,7 +149,7 @@ function generateHtmlSnippet(results: { type: string; url: string }[]): string {
     html += `  <source srcset="${webp.url}" type="image/webp">\n`;
   }
   html += `  <img src="${fallback.url}" alt="Image description">\n`;
-  html += "</picture>";
+  html += '</picture>';
   return html;
 }
 </script>
