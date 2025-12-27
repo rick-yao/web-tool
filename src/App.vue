@@ -81,7 +81,7 @@ const activeTab = ref<'image-optimizer' | 'tool2'>('image-optimizer');
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8 max-w-3xl">
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
       <ImageOptimizer v-if="activeTab === 'image-optimizer'" :config="config" />
 
       <!-- Coming Soon Tool -->
